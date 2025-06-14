@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:carzone_demo/data/responses/get_car_response.dart';
+import 'package:carzone_demo/presentation/carStore.dart' show Car;
 import 'package:encrypt_shared_preferences/provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -35,34 +36,6 @@ class Api {
       throw Exception('Network error');
     }
   }
-  static Future<GetCarResponse> getCars() async {
-  try {
-    final url = Uri.parse('$baseUrl/api/cars');
-    final response = await http.get(
-      url,
-      headers: {'Content-Type': 'application/json'},
-    );
-
-    print('Status: ${response.statusCode}');
-    print('Content-Type: ${response.headers['content-type']}');
-    print('Body: ${response.body}');
-final data = jsonDecode(response.body);
-    if (response.statusCode == 200) {
-    
-      return GetCarResponse.fromJson(data);
-    } else if (response.statusCode == 400 || response.statusCode == 401) {
-      final data = jsonDecode(response.body);
-      return GetCarResponse.fromJson(data);
-    } else {
-      throw Exception('Server error: ${response.statusCode}');
-    }
-  } on http.ClientException {
-    throw Exception('Network error');
-  } catch (e) {
-    throw Exception('Unexpected error: $e');
-  }
-}
-
 
   static Timer? _refreshTimer;
   static void _cancelRefreshTimer() {
@@ -186,6 +159,44 @@ final data = jsonDecode(response.body);
       }
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<List<Car>> getCars() async {
+    final url = Uri.parse('$baseUrl/api/cars');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final jsonBody = jsonDecode(response.body);
+      final getCarResponse = GetCarResponse.fromJson(jsonBody);
+      final cars = getCarResponse.data?.map((data) => Car.fromData(data)).toList() ?? [];
+      return cars;
+    } else {
+      throw Exception('Failed to load cars');
+    }
+  }
+
+  static Future<String> contactUs({
+    required String name,
+    required String email,
+    required String body,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/contact');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'body': body,
+      }),
+    );
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+    if (response.statusCode == 200) {
+      final jsonBody = jsonDecode(response.body);
+      return jsonBody['message'] ?? 'Message sent.';
+    } else {
+      throw Exception('Failed to send contact message');
     }
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:carzone_demo/data/api.dart';
+import 'package:carzone_demo/data/models.dart';
 import 'carStore.dart' as car_store;
 import 'event.dart';
 import 'profile.dart' as profile;
@@ -222,24 +224,24 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
               children: [
                 _buildDealCard(
                   'LIMITED TIME',
-                  'BMW X5 2023',
-                  'Premium SUV with advanced features and luxury interior',
-                  '\$45,000',
-                  '\$52,000',
+                  'Lotus Emira',
+                  'Lightweight design with agile handling',
+                  '£495,000',
+                  '£520,000',
                 ),
                 _buildDealCard(
                   'BEST SELLER',
-                  'Mercedes C-Class',
+                  'Porsche 911 GT3',
                   'Elegant sedan perfect for city driving and long trips',
-                  '\$38,500',
-                  '\$43,000',
+                  '£380,500',
+                  '£430,000',
                 ),
                 _buildDealCard(
                   'NEW ARRIVAL',
-                  'Audi A4 2024',
+                  'Nissan GT-R',
                   'Latest model with cutting-edge technology',
-                  '\$42,000',
-                  '\$47,500',
+                  '£420,000',
+                  '£470,500',
                 ),
               ],
             ),
@@ -329,6 +331,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                         Spacer(),
+                        Text("Deposit:" , style: TextStyle(fontWeight: FontWeight.bold , color: Colors.white),),
                         Row(
                           children: [
                             Text(
@@ -357,7 +360,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
               ),
             ),
           ),
-        );
+          );
       },
     );
   }
@@ -410,6 +413,15 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
     String name,
     String testimonial,
   ) {
+    // Add a map to hold reaction counts for this card (in a real app, this would come from backend)
+    Map<String, int> reactionCounts = {
+      'haha': 0,
+      'like': 0,
+      'love': 0,
+      'wow': 0,
+      'sad': 0,
+      'angry': 0,
+    };
     return AnimatedBuilder(
       animation: _fadeAnimation,
       builder: (context, child) {
@@ -471,7 +483,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                                     ),
                                   ),
                                   SizedBox(height: 5),
-                                  Text('⭐⭐⭐⭐⭐', style: TextStyle(fontSize: 14)),
+                                  // Text('⭐⭐⭐⭐⭐', style: TextStyle(fontSize: 14)),
                                 ],
                               ),
                             ),
@@ -486,6 +498,8 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                             fontStyle: FontStyle.italic,
                           ),
                         ),
+                        SizedBox(height: 15),
+                        _buildReactionsRow(reactionCounts),
                       ],
                     ),
                   ),
@@ -493,8 +507,58 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
               ),
             ),
           ),
-        );
+          );
       },
+    );
+  }
+
+  Widget _buildReactionsRow(Map<String, int> reactionCounts) {
+    final reacts = [
+      {'emoji': '😂', 'label': 'haha'},
+      {'emoji': '👍', 'label': 'like'},
+      {'emoji': '❤️', 'label': 'love'},
+      {'emoji': '😮', 'label': 'wow'},
+      {'emoji': '😢', 'label': 'sad'},
+      {'emoji': '😡', 'label': 'angry'},
+    ];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: reacts.map((react) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2.0),
+            child: Column(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    // In a real app, update state and backend
+                    reactionCounts[react['label']!] = (reactionCounts[react['label']!] ?? 0) + 1;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Reacted with ${react['label']}'),
+                        backgroundColor: Color(0xFFDAA520),
+                      ),
+                    );
+                  },
+                  icon: Text(
+                    react['emoji']!,
+                    style: TextStyle(fontSize: 22),
+                  ),
+                  tooltip: react['label'],
+                ),
+                Container(
+                  width: 24,
+                  alignment: Alignment.center,
+                  child: Text(
+                    reactionCounts[react['label']!].toString(),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -514,8 +578,10 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
         ],
       ),
       child: FloatingActionButton(
-        onPressed: () {
-          showDialog(
+        onPressed: () async {
+          // Show dialog to enter comment
+          String commentText = '';
+          await showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
@@ -524,20 +590,47 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                   borderRadius: BorderRadius.circular(20),
                 ),
                 title: Text(
-                  'Quick Action',
+                  'Add Comment',
                   style: TextStyle(color: Colors.white),
                 ),
-                content: Text(
-                  'Add new listing or perform quick action!',
-                  style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                content: TextField(
+                  autofocus: true,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Type your comment...',
+                    hintStyle: TextStyle(color: Colors.white54),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.05),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onChanged: (value) {
+                    commentText = value;
+                  },
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      'OK',
-                      style: TextStyle(color: Color(0xFFDAA520)),
-                    ),
+                    child: Text('Cancel', style: TextStyle(color: Color(0xFFDAA520))),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      if (commentText.trim().isNotEmpty) {
+                        try {
+                          // Example: userId = 1
+                          // await Api.createComment(Comment(userId: 1, body: commentText.trim()));
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Comment added!'), backgroundColor: Color(0xFFDAA520)),
+                          );
+                        } catch (e) {
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to add comment'), backgroundColor: Colors.red),
+                          );
+                        }
+                      }
+                    },
+                    child: Text('Send', style: TextStyle(color: Color(0xFFDAA520))),
                   ),
                 ],
               );
