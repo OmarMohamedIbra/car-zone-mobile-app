@@ -1,5 +1,6 @@
 import 'package:carzone_demo/data/api.dart';
 import 'package:carzone_demo/data/responses/get_car_response.dart';
+import 'package:carzone_demo/presentation/car_booking.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -138,15 +139,9 @@ class _CarStoreScreenState extends State<CarStoreScreen>
   }
 
   void bookCar(String carName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Booking request sent for $carName! Our team will contact you shortly.',
-        ),
-        backgroundColor: Color(0xFFDAA520),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CarBookingScreen()),
     );
   }
 

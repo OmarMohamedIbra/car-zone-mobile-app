@@ -265,6 +265,50 @@ class Api {
     }
   }
 
+  static Future<String> createReact({
+    required int userId,
+    required int commentId,
+    required String type,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/commentReactions');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': userId.toString(),
+        'comment_id': commentId.toString(),
+        'type': type,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonBody = jsonDecode(response.body);
+      return jsonBody['message'] ?? 'Reaction saved successfully';
+    } else {
+      throw Exception('Failed to save reaction');
+    }
+  }
+
+  static Future<Map<String, dynamic>> carBooking({
+    required int carId,
+    required int userId,
+    required double amount,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/book/$carId');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': userId,
+        'amount': amount,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to book car');
+    }
+  }
+
   static Future<void> logout() async {
     final prefs = EncryptedSharedPreferences.getInstance();
     await prefs.remove('token');

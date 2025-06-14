@@ -421,56 +421,71 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
   }
 
   Widget _buildCommentCard(api.Comment comment) {
-    return AnimatedBuilder(
-      animation: _fadeAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, 30 * (1 - _fadeAnimation.value)),
-          child: Opacity(
-            opacity: _fadeAnimation.value,
-            child: Container(
-              width: double.infinity,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Color(0xFFDAA520).withOpacity(0.2)),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      comment.body,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.95),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        fontStyle: FontStyle.italic,
-                        height: 1.6,
+    bool _showReactions = false;
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return MouseRegion(
+          onEnter: (_) => setState(() => _showReactions = true),
+          onExit: (_) => setState(() => _showReactions = false),
+          child: AnimatedBuilder(
+            animation: _fadeAnimation,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(0, 30 * (1 - _fadeAnimation.value)),
+                child: Opacity(
+                  opacity: _fadeAnimation.value,
+                  child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Color(0xFFDAA520).withOpacity(0.2)),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            comment.body,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.95),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              fontStyle: FontStyle.italic,
+                              height: 1.6,
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            comment.createdAt.toLocal().toString().split(' ')[0],
+                            style: TextStyle(fontSize: 12, color: Colors.white54),
+                          ),
+                          SizedBox(height: 10),
+                          AnimatedOpacity(
+                            opacity: _showReactions ? 1.0 : 0.0,
+                            duration: Duration(milliseconds: 200),
+                            child: _showReactions ? _buildReactionsRow(comment.reactionsSummary, enableReact: true, commentId: comment.id) : SizedBox.shrink(),
+                          ),
+                          if (!_showReactions)
+                            _buildReactionsRow(comment.reactionsSummary, enableReact: false, commentId: comment.id),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 12),
-                    Text(
-                      comment.createdAt.toLocal().toString().split(' ')[0],
-                      style: TextStyle(fontSize: 12, color: Colors.white54),
-                    ),
-                    SizedBox(height: 10),
-                    _buildReactionsRow(comment.reactionsSummary),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         );
       },
     );
   }
 
-  Widget _buildReactionsRow(Map<String, int> reactionCounts) {
+  Widget _buildReactionsRow(Map<String, int> reactionCounts, {bool enableReact = false, int? commentId}) {
     final reacts = [
       {'emoji': '😂', 'label': 'haha'},
       {'emoji': '👍', 'label': 'like'},
@@ -479,35 +494,76 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
       {'emoji': '😢', 'label': 'sad'},
       {'emoji': '😡', 'label': 'angry'},
     ];
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: reacts.map((react) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-            child: Column(
-              children: [
-                IconButton(
-                  onPressed: null, // Disabled for now
-                  icon: Text(
-                    react['emoji']!,
-                    style: TextStyle(fontSize: 22),
-                  ),
-                  tooltip: react['label'],
+    return StatefulBuilder(
+      builder: (context, setState) {
+        // Make a local copy to update UI instantly
+        final localCounts = Map<String, int>.from(reactionCounts);
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: reacts.map((react) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: Column(
+                  children: [
+                    IconButton(
+                      onPressed: enableReact && commentId != null ? () async {
+                        final prefs = EncryptedSharedPreferences.getInstance();
+                        final userId = await prefs.getInt('user_id');
+                        if (userId != null) {
+                          try {
+                            await api.Api.createReact(
+                              userId: userId,
+                              commentId: commentId,
+                              type: react['label']!,
+                            );
+                            setState(() {
+                              localCounts[react['label']!] = (localCounts[react['label']!] ?? 0) + 1;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Reacted with ${react['label']}'),
+                                backgroundColor: Color(0xFFDAA520),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to react'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('You must be logged in to react.'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } : null,
+                      icon: Text(
+                        react['emoji']!,
+                        style: TextStyle(fontSize: 22),
+                      ),
+                      tooltip: react['label'],
+                    ),
+                    Container(
+                      width: 24,
+                      alignment: Alignment.center,
+                      child: Text(
+                        (localCounts[react['label']] ?? 0).toString(),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  width: 24,
-                  alignment: Alignment.center,
-                  child: Text(
-                    (reactionCounts[react['label']] ?? 0).toString(),
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 
