@@ -5,6 +5,35 @@ import 'package:carzone_demo/presentation/carStore.dart' show Car;
 import 'package:encrypt_shared_preferences/provider.dart';
 import 'package:http/http.dart' as http;
 
+class Comment {
+  final int id;
+  final int userId;
+  final String body;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final Map<String, int> reactionsSummary;
+
+  Comment({
+    required this.id,
+    required this.userId,
+    required this.body,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.reactionsSummary,
+  });
+
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
+      id: json['id'],
+      userId: json['user_id'],
+      body: json['body'],
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+      reactionsSummary: Map<String, int>.from(json['reactions_summary'] ?? {}),
+    );
+  }
+}
+
 class Api {
   static const String baseUrl = "http://191.96.53.235:8084";
 
@@ -197,6 +226,39 @@ class Api {
       return jsonBody['message'] ?? 'Message sent.';
     } else {
       throw Exception('Failed to send contact message');
+    }
+  }
+
+  static Future<List<Comment>> getComment() async {
+    final url = Uri.parse('$baseUrl/api/comments');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final jsonBody = jsonDecode(response.body);
+      final List data = jsonBody['data'] ?? [];
+      return data.map((e) => Comment.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load comments');
+    }
+  }
+
+  static Future<Comment> createComment({
+    required int userId,
+    required String body,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/comments');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': userId,
+        'body': body,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonBody = jsonDecode(response.body);
+      return Comment.fromJson(jsonBody['comment']);
+    } else {
+      throw Exception('Failed to create comment');
     }
   }
 }

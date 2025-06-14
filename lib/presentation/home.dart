@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:carzone_demo/data/api.dart';
+import 'package:carzone_demo/data/api.dart' as api;
 import 'package:carzone_demo/data/models.dart';
 import 'carStore.dart' as car_store;
 import 'event.dart';
@@ -366,62 +366,49 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
   }
 
   Widget _buildTestimonialsSection() {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return FutureBuilder<List<api.Comment>>(
+      future: api.Api.getComment(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: Color(0xFFDAA520)));
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Failed to load comments', style: TextStyle(color: Colors.red)));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No comments yet.', style: TextStyle(color: Colors.white70)));
+        }
+        final comments = snapshot.data!;
+        return Container(
+          margin: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('💬', style: TextStyle(fontSize: 24)),
-              SizedBox(width: 10,),
-              Text(
-                'What Our Customers Say',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFDAA520),
-                ),
+              Row(
+                children: [
+                  Text('💬', style: TextStyle(fontSize: 24)),
+                  SizedBox(width: 10,),
+                  Text(
+                    'What Our Customers Say',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFDAA520),
+                    ),
+                  ),
+                ],
               ),
+              SizedBox(height: 20),
+              ...comments.map((c) => Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: _buildCommentCard(c),
+              )),
             ],
           ),
-          SizedBox(height: 20),
-          _buildTestimonialCard(
-            'S',
-            'Sarah Ahmed',
-            '"Amazing service! Found my dream car at an unbeatable price. The team was professional and made the buying process so smooth."',
-          ),
-          SizedBox(height: 15),
-          _buildTestimonialCard(
-            'M',
-            'Mohamed Ali',
-            '"Best car dealership in town! Great deals, honest pricing, and excellent customer service. Highly recommended!"',
-          ),
-          SizedBox(height: 15),
-          _buildTestimonialCard(
-            'F',
-            'Fatima Hassan',
-            '"Bought my first car from CarZone and couldn\'t be happier! They helped me find the perfect match within my budget."',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildTestimonialCard(
-    String initial,
-    String name,
-    String testimonial,
-  ) {
-    // Add a map to hold reaction counts for this card (in a real app, this would come from backend)
-    Map<String, int> reactionCounts = {
-      'haha': 0,
-      'like': 0,
-      'love': 0,
-      'wow': 0,
-      'sad': 0,
-      'angry': 0,
-    };
+  Widget _buildCommentCard(api.Comment comment) {
     return AnimatedBuilder(
       animation: _fadeAnimation,
       builder: (context, child) {
@@ -435,79 +422,73 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Color(0xFFDAA520).withOpacity(0.2)),
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {},
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFDAA520),
-                                    Color(0xFFFFD700),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  initial,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF1a1a2e),
-                                  ),
-                                ),
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFDAA520), Color(0xFFFFD700)],
+                            ),
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: Center(
+                            child: Text(
+                              comment.body.isNotEmpty ? comment.body[0].toUpperCase() : '?',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1a1a2e),
                               ),
                             ),
-                            SizedBox(width: 15),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    name,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  // Text('⭐⭐⭐⭐⭐', style: TextStyle(fontSize: 14)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 15),
-                        Text(
-                          testimonial,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            height: 1.5,
-                            fontStyle: FontStyle.italic,
                           ),
                         ),
-                        SizedBox(height: 15),
-                        _buildReactionsRow(reactionCounts),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'User #${comment.userId}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                comment.createdAt.toLocal().toString().split(' ')[0],
+                                style: TextStyle(fontSize: 12, color: Colors.white54),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
+                    SizedBox(height: 15),
+                    Text(
+                      comment.body,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        height: 1.5,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    _buildReactionsRow(comment.reactionsSummary),
+                  ],
                 ),
               ),
             ),
           ),
-          );
+        );
       },
     );
   }
@@ -530,16 +511,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
             child: Column(
               children: [
                 IconButton(
-                  onPressed: () {
-                    // In a real app, update state and backend
-                    reactionCounts[react['label']!] = (reactionCounts[react['label']!] ?? 0) + 1;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Reacted with ${react['label']}'),
-                        backgroundColor: Color(0xFFDAA520),
-                      ),
-                    );
-                  },
+                  onPressed: null, // Disabled for now
                   icon: Text(
                     react['emoji']!,
                     style: TextStyle(fontSize: 22),
@@ -550,7 +522,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                   width: 24,
                   alignment: Alignment.center,
                   child: Text(
-                    reactionCounts[react['label']!].toString(),
+                    (reactionCounts[react['label']] ?? 0).toString(),
                     style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
@@ -579,7 +551,6 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
       ),
       child: FloatingActionButton(
         onPressed: () async {
-          // Show dialog to enter comment
           String commentText = '';
           await showDialog(
             context: context,
@@ -616,9 +587,10 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                     onPressed: () async {
                       if (commentText.trim().isNotEmpty) {
                         try {
-                          // Example: userId = 1
-                          // await Api.createComment(Comment(userId: 1, body: commentText.trim()));
+                          // Example: userId = 1 (replace with actual user id if available)
+                          await api.Api.createComment(userId: 1, body: commentText.trim());
                           Navigator.of(context).pop();
+                          setState(() {}); // Refresh comments
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Comment added!'), backgroundColor: Color(0xFFDAA520)),
                           );
@@ -630,7 +602,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                         }
                       }
                     },
-                    child: Text('Send', style: TextStyle(color: Color(0xFFDAA520))),
+                    child: Text('Add', style: TextStyle(color: Color(0xFFDAA520))),
                   ),
                 ],
               );
