@@ -105,94 +105,6 @@ class _CarStoreScreenState extends State<CarStoreScreen>
       features: ['Safety Sense', 'Wireless Charging', 'JBL Audio'],
       emoji: '🚘',
     ),
-    Car(
-      model: 'Lamborghini Urus Performante',
-      year: 2025,
-      price: "325000",
-      engine: '4.0L V8 Twin-Turbo',
-      transmission: '8-speed Auto',
-      mileage: '1,200 km',
-      fuelType: 'Petrol',
-      features: ['Carbon Package', 'Night Vision', 'B&O Sound System', 'Adaptive Air Suspension'],
-      emoji: '🏎️',
-    ),
-    Car(
-      model: 'Rolls-Royce Ghost Black Badge',
-      year: 2025,
-      price: "450000",
-      engine: '6.75L V12',
-      transmission: '8-speed Auto',
-      mileage: '500 km',
-      fuelType: 'Petrol',
-      features: ['Starlight Headliner', 'Bespoke Audio', 'Rear Theater', 'Champagne Cooler'],
-      emoji: '🚙',
-    ),
-    Car(
-      model: 'Tesla Model S Plaid',
-      year: 2025,
-      price: "135000",
-      engine: 'Tri-Motor Electric',
-      transmission: 'Single-Speed',
-      mileage: '2,000 km',
-      fuelType: 'Electric',
-      features: ['Full Self-Driving', 'Gaming Computer', 'Glass Roof', 'Yoke Steering'],
-      emoji: '🚗',
-    ),
-    Car(
-      model: 'Porsche Taycan Turbo S',
-      year: 2025,
-      price: "195000",
-      engine: 'Dual Electric Motors',
-      transmission: '2-Speed Auto',
-      mileage: '1,500 km',
-      fuelType: 'Electric',
-      features: ['Performance Battery Plus', 'Sport Chrono', 'Ceramic Brakes', 'Active Suspension'],
-      emoji: '🏎️',
-    ),
-    Car(
-      model: 'Range Rover SV Autobiography',
-      year: 2025,
-      price: "275000",
-      engine: '5.0L V8',
-      transmission: '8-speed Auto',
-      mileage: '3,000 km',
-      fuelType: 'Petrol',
-      features: ['Executive Seating', 'Event Seating', 'Hot Stone Massage', 'Meridian Signature Audio'],
-      emoji: '🚙',
-    ),
-    Car(
-      model: 'McLaren Artura',
-      year: 2025,
-      price: "237500",
-      engine: '3.0L V6 Hybrid',
-      transmission: '8-speed DCT',
-      mileage: '800 km',
-      fuelType: 'Hybrid',
-      features: ['Carbon Monocage', 'Electro Hydraulic Steering', 'Variable Drift Control', 'Track Telemetry'],
-      emoji: '🏎️',
-    ),
-    Car(
-      model: 'Bentley Flying Spur Mulliner',
-      year: 2025,
-      price: "285000",
-      engine: '6.0L W12',
-      transmission: '8-speed DCT',
-      mileage: '1,000 km',
-      fuelType: 'Petrol',
-      features: ['Diamond Quilting', 'Rotating Display', 'Naim Audio', 'City Specification'],
-      emoji: '🚗',
-    ),
-    Car(
-      model: 'Aston Martin DBX707',
-      year: 2025,
-      price: "245000",
-      engine: '4.0L V8 Twin-Turbo',
-      transmission: '9-speed Auto',
-      mileage: '1,800 km',
-      fuelType: 'Petrol',
-      features: ['22" Wheels', 'Sports Exhaust', 'Carbon Ceramic Brakes', 'Q Customization'],
-      emoji: '🚙',
-    ),
   ];
 
   List<Car> sortedCars = [];
@@ -540,42 +452,34 @@ class _CarCardState extends State<CarCard> with SingleTickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              flex: 2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.car.model,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                    softWrap: true,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.car.model,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
                                   ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    widget.car.year.toString(),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFFDAA520),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                '\$${widget.car.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFFDAA520),
                                 ),
-                                textAlign: TextAlign.right,
-                                softWrap: true,
+                                SizedBox(width: 5),
+                                Text(
+                                  widget.car.year.toString(),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFFDAA520),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '\$${widget.car.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFDAA520),
                               ),
                             ),
                           ],
