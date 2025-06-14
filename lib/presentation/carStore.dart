@@ -77,6 +77,7 @@ class CarStoreScreen extends StatefulWidget {
 class _CarStoreScreenState extends State<CarStoreScreen>
     with TickerProviderStateMixin {
   String currentSort = 'Default';
+  final List<String> sortOptions = ['Default', 'Model', 'Year', 'Least Price', 'Highest Price'];
   bool isDropdownOpen = false;
   
   List<Car> cars = [];
@@ -127,7 +128,23 @@ class _CarStoreScreenState extends State<CarStoreScreen>
   void sortCars(String criteria) {
     setState(() {
       currentSort = criteria;
-      // Sorting logic can be implemented here if needed for backend data
+      if (criteria == 'Model') {
+        cars.sort((a, b) => a.model.compareTo(b.model));
+      } else if (criteria == 'Year') {
+        cars.sort((a, b) => b.year.compareTo(a.year)); // Newest first
+      } else if (criteria == 'Least Price') {
+        cars.sort((a, b) {
+          final aPrice = double.tryParse(a.price.replaceAll(',', '')) ?? double.infinity;
+          final bPrice = double.tryParse(b.price.replaceAll(',', '')) ?? double.infinity;
+          return aPrice.compareTo(bPrice);
+        });
+      } else if (criteria == 'Highest Price') {
+        cars.sort((a, b) {
+          final aPrice = double.tryParse(a.price.replaceAll(',', '')) ?? double.negativeInfinity;
+          final bPrice = double.tryParse(b.price.replaceAll(',', '')) ?? double.negativeInfinity;
+          return bPrice.compareTo(aPrice);
+        });
+      }
       isDropdownOpen = false;
     });
   }
@@ -215,104 +232,39 @@ class _CarStoreScreenState extends State<CarStoreScreen>
                             ],
                           ),
                         ),
-                        // Sorting Section (kept for UI, but only affects backend data if implemented)
-                        Container(
-                          padding: EdgeInsets.all(20),
+                        SizedBox(height: 10),
+                        // New horizontal sort row
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Sort by:',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isDropdownOpen = !isDropdownOpen;
-                                  });
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    border: Border.all(
-                                      color: Color(0xFFDAA520).withOpacity(0.3),
+                            children: sortOptions.map((option) =>
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                child: ElevatedButton(
+                                  onPressed: () => sortCars(option),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: currentSort == option ? Color(0xFFDAA520) : Color(0xFF1a1a2e),
+                                    foregroundColor: currentSort == option ? Color(0xFF1a1a2e) : Colors.white,
+                                    elevation: currentSort == option ? 2 : 0,
+                                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18),
+                                      side: BorderSide(color: Color(0xFFDAA520).withOpacity(0.4)),
                                     ),
-                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        currentSort,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10),
-                                      AnimatedRotation(
-                                        turns: isDropdownOpen ? 0.5 : 0,
-                                        duration: Duration(milliseconds: 300),
-                                        child: Icon(
-                                          Icons.keyboard_arrow_down,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ],
+                                  child: Text(
+                                    option,
+                                    style: TextStyle(
+                                      fontWeight: currentSort == option ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: 15,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ],
+                            ).toList(),
                           ),
                         ),
-                        if (isDropdownOpen)
-                          Container(
-                            margin: EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF1a1a2e).withOpacity(0.95),
-                              border: Border.all(
-                                color: Color(0xFFDAA520).withOpacity(0.3),
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Column(
-                              children: ['Default', 'By Model', 'By Year', 'By Price']
-                                  .map(
-                                    (option) => GestureDetector(
-                                      onTap: () => sortCars(option),
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: currentSort == option
-                                              ? Color(0xFFDAA520).withOpacity(0.2)
-                                              : Colors.transparent,
-                                        ),
-                                        child: Text(
-                                          option,
-                                          style: TextStyle(
-                                            color: currentSort == option
-                                                ? Color(0xFFDAA520)
-                                                : Colors.white,
-                                            fontWeight: currentSort == option
-                                                ? FontWeight.w600
-                                                : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
+                        SizedBox(height: 10),
                         // Cars List
                         Expanded(
                           child: carCount == 0
@@ -425,8 +377,14 @@ class _CarCardState extends State<CarCard> with SingleTickerProviderStateMixin {
                       ),
                     ),
                     child: Center(
-                      child: Image.network(widget.car.emoji)
-                    
+                      child: (widget.car.emoji.startsWith('http') && widget.car.emoji.isNotEmpty)
+    ? Image.network(
+        widget.car.emoji,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(Icons.directions_car, size: 80, color: Color(0xFFDAA520));
+        },
+      )
+    : Icon(Icons.directions_car, size: 80, color: Color(0xFFDAA520)),
                     ),
                   ),
 

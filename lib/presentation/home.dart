@@ -17,6 +17,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
   late Animation<double> _fadeAnimation;
   int selectedNavIndex = 0;
   String? _userName;
+  Future<List<api.Comment>>? _commentsFuture;
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
     );
     _animationController.forward();
     _loadUserName();
+    _commentsFuture = api.Api.getComment();
   }
 
   Future<void> _loadUserName() async {
@@ -37,6 +39,12 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
     final name = await prefs.getString('name');
     setState(() {
       _userName = name;
+    });
+  }
+
+  void _reloadComments() {
+    setState(() {
+      _commentsFuture = api.Api.getComment();
     });
   }
 
@@ -88,7 +96,6 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                 child: Column(
                   children: [
                     _buildHeader(),
-                    _buildSearchBar(),
                     _buildHotDealsSection(),
                     _buildTestimonialsSection(),
                     SizedBox(height: 100), // Space for bottom nav
@@ -170,35 +177,6 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      margin: EdgeInsets.all(20),
-      child: TextField(
-        style: TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: 'Search for cars, deals, services...',
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.1),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
-            borderSide: BorderSide(color: Color(0xFFDAA520).withOpacity(0.3)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
-            borderSide: BorderSide(color: Color(0xFFDAA520).withOpacity(0.3)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(25),
-            borderSide: BorderSide(color: Color(0xFFDAA520)),
-          ),
-          suffixIcon: Icon(Icons.search, color: Color(0xFFDAA520)),
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        ),
       ),
     );
   }
@@ -379,7 +357,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
 
   Widget _buildTestimonialsSection() {
     return FutureBuilder<List<api.Comment>>(
-      future: api.Api.getComment(),
+      future: _commentsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator(color: Color(0xFFDAA520)));
@@ -517,9 +495,10 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
                               commentId: commentId,
                               type: react['label']!,
                             );
-                            setState(() {
-                              localCounts[react['label']!] = (localCounts[react['label']!] ?? 0) + 1;
-                            });
+                            // Reload comments to update reaction counters
+                            if (mounted) {
+                              _reloadComments();
+                            }
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Reacted with ${react['label']}'),
