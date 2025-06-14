@@ -311,11 +311,11 @@ class _CarStoreScreenState extends State<CarStoreScreen>
     });
   }
 
-  void bookCar(String carModel) {
+  void bookCar(String carName) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Booking request sent for $carModel! Our team will contact you shortly.',
+          'Booking request sent for $carName! Our team will contact you shortly.',
         ),
         backgroundColor: Color(0xFFDAA520),
         behavior: SnackBarBehavior.floating,
@@ -485,7 +485,7 @@ class _CarStoreScreenState extends State<CarStoreScreen>
                     padding: EdgeInsets.all(20),
                     itemCount: getCarResponse?.data?.length ?? 0,
                     itemBuilder: (context, index) {
-                      final car = sortedCars[index];
+                      // final car = sortedCars[index];
                       return AnimatedContainer(
                         duration: Duration(milliseconds: 300),
                         margin: EdgeInsets.only(bottom: 20),
@@ -493,7 +493,7 @@ class _CarStoreScreenState extends State<CarStoreScreen>
                           car: Car(model: getCarResponse?.data?[index].model??"", year: getCarResponse?.data?[index].year??0, price: getCarResponse?.data?[index].price??"", engine: (getCarResponse?.data?[index].enginePower??"").toString(), transmission: getCarResponse?.data?[index].transmission??"", mileage: (getCarResponse?.data?[index].topSpeed??"").toString(), fuelType: getCarResponse?.data?[index].engineType??"", features: cars[index].features, emoji: getCarResponse?.data?[index].mainImage??""),
                           isFavorite: favorites[index],
                           onFavoriteToggle: () => toggleFavorite(index),
-                          onBook: () => bookCar(car.model),
+                          onBook: () => bookCar(getCarResponse?.data?[index].model??""),
                         ),
                       );
                     },

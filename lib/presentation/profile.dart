@@ -1,5 +1,8 @@
 import 'package:carzone_demo/presentation/auth.dart';
 import 'package:carzone_demo/presentation/event.dart';
+import 'package:carzone_demo/presentation/contact_support_page.dart';
+import 'package:carzone_demo/presentation/feedback_page.dart';
+import 'package:carzone_demo/presentation/about_carzone_page.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -149,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Ahmed Mohamed',
+                  'Omar Mohamed',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -158,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'ahmed.m@example.com',
+                  'Omarmohamed@gmail.com',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white.withOpacity(0.7),
@@ -364,10 +367,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       '❤️ Support & About',
       Column(
         children: [
-          _buildSettingItem('📩', 'Contact Support', '', onTap: () =>Navigator.push(context, MaterialPageRoute(builder: (context) => CarEventsScreen(),))),
-          _buildSettingItem('📝', 'Feedback', '', onTap: () => _showSnackBar('Opening Feedback...')),
-          _buildSettingItem('ℹ️', 'About CarZone', '', onTap: () => _showSnackBar('Opening About CarZone...')),
-          _buildSettingItem('📱', 'App Version', 'v2.5.1'),
+          _buildSettingItem('📩', 'Contact Support', '', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ContactSupportPage()))),
+          _buildSettingItem('📝', 'Feedback', '', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackPage()))),
+          _buildSettingItem('ℹ️', 'About CarZone', '', onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AboutCarZonePage()))),
+          _buildSettingItem('📱', 'App Version', 'v1.0.1'),
         ],
       ),
     );
