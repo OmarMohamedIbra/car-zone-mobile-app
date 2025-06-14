@@ -1,9 +1,11 @@
+import 'package:carzone_demo/data/api.dart';
 import 'package:carzone_demo/presentation/auth.dart';
 import 'package:carzone_demo/presentation/event.dart';
 import 'package:carzone_demo/presentation/contact_support_page.dart';
 import 'package:carzone_demo/presentation/feedback_page.dart';
 import 'package:carzone_demo/presentation/about_carzone_page.dart';
 import 'package:flutter/material.dart';
+import 'package:encrypt_shared_preferences/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -119,92 +121,60 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   }
 
   Widget _buildProfileHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFDAA520).withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          // Container(
-          //   width: 80,
-          //   height: 80,
-          //   decoration: BoxDecoration(
-          //     shape: BoxShape.circle,
-          //     border: Border.all(
-          //       color: const Color(0xFFDAA520),
-          //       width: 3,
-          //     ),
-          //     image: const DecorationImage(
-          //       image: NetworkImage('https://randomuser.me/api/portraits/men/32.jpg'),
-          //       fit: BoxFit.cover,
-          //     ),
-          //   ),
-          // ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Omar Mohamed',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Omarmohamed@gmail.com',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _buildStatItem('12', 'Events'),
-                    const SizedBox(width: 15),
-                    _buildStatItem('5', 'Cars'),
-                    const SizedBox(width: 15),
-                    _buildStatItem('3', 'Badges'),
-                  ],
-                ),
-              ],
+    return FutureBuilder<Map<String, String>>(
+      future: _getProfileInfo(),
+      builder: (context, snapshot) {
+        final name = snapshot.data?['name'] ?? '';
+        final email = snapshot.data?['email'] ?? '';
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFFDAA520).withOpacity(0.2),
+              width: 1,
             ),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      email,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFFDAA520),
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.white.withOpacity(0.7),
-          ),
-        ),
-      ],
-    );
+  Future<Map<String, String>> _getProfileInfo() async {
+    final prefs = EncryptedSharedPreferences.getInstance();
+    final name = prefs.getString('name') ?? '';
+    final email = prefs.getString('email') ?? '';
+    return {'name': name, 'email': email};
   }
 
   Widget _buildRegisteredEvents() {
@@ -544,11 +514,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           content: const Text('Are you sure you want to logout?', style: TextStyle(color: Colors.white70)),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                 Navigator.of(context).pop();},
               child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
             ),
             TextButton(
               onPressed: () {
+                Api.logout(); // Call your logout API here
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const AuthScreen()), // Replace with your login screen

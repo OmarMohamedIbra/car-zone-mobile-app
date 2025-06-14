@@ -4,6 +4,7 @@ import 'package:carzone_demo/data/models.dart';
 import 'carStore.dart' as car_store;
 import 'event.dart';
 import 'profile.dart' as profile;
+import 'package:encrypt_shared_preferences/provider.dart';
 
 class CarZoneHomeScreen extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   int selectedNavIndex = 0;
+  String? _userName;
 
   @override
   void initState() {
@@ -27,6 +29,15 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = EncryptedSharedPreferences.getInstance();
+    final name = await prefs.getString('name');
+    setState(() {
+      _userName = name;
+    });
   }
 
   @override
@@ -117,10 +128,11 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
           ),
           SizedBox(height: 5),
           Text(
-            'Omar Mohamed',
+            _userName ?? '',
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.white.withOpacity(0.7),
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
         ],
@@ -417,71 +429,36 @@ class _CarZoneHomeScreenState extends State<CarZoneHomeScreen>
           child: Opacity(
             opacity: _fadeAnimation.value,
             child: Container(
+              width: double.infinity,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Color(0xFFDAA520).withOpacity(0.2)),
               ),
               child: Padding(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Color(0xFFDAA520), Color(0xFFFFD700)],
-                            ),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: Center(
-                            child: Text(
-                              comment.body.isNotEmpty ? comment.body[0].toUpperCase() : '?',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF1a1a2e),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'User #${comment.userId}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                comment.createdAt.toLocal().toString().split(' ')[0],
-                                style: TextStyle(fontSize: 12, color: Colors.white54),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 15),
                     Text(
                       comment.body,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        height: 1.5,
+                        color: Colors.white.withOpacity(0.95),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
+                        height: 1.6,
                       ),
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 12),
+                    Text(
+                      comment.createdAt.toLocal().toString().split(' ')[0],
+                      style: TextStyle(fontSize: 12, color: Colors.white54),
+                    ),
+                    SizedBox(height: 10),
                     _buildReactionsRow(comment.reactionsSummary),
                   ],
                 ),

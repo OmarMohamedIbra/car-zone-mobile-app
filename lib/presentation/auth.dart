@@ -4,8 +4,8 @@ import 'home.dart';
 
 
 
-class CarZoneApp extends StatelessWidget {
-  const CarZoneApp({super.key});
+class CarZoneAuth extends StatelessWidget {
+  const CarZoneAuth({super.key});
 
   @override
   Widget build(BuildContext context) {

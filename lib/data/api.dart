@@ -45,18 +45,21 @@ class Api {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('Response status: \\${response.statusCode}');
+      print('Response body: \\${response.body}');
       if (response.statusCode == 200) {
-        // final data = jsonDecode(response.body);
-        // final prefs = EncryptedSharedPreferences.getInstance();
-        // await prefs.setString('token', data['token']);
+        final data = jsonDecode(response.body)['data'];
+        final prefs = EncryptedSharedPreferences.getInstance();
+        await prefs.setString('token', data['token']);
+        await prefs.setInt('user_id', data['id']);
+        await prefs.setString('name', data['name'] ?? '');
+        await prefs.setString('email', data['email'] ?? '');
+        await prefs.setString('phone_no', data['phone_no'] ?? '');
+        await prefs.setString('address', data['address'] ?? '');
         return true;
       } else if (response.statusCode == 400 || response.statusCode == 401) {
-        // Incorrect credentials
         return false;
       } else {
-        // Server error
         throw Exception('Server error');
       }
     } on http.ClientException catch (_) {
@@ -260,5 +263,15 @@ class Api {
     } else {
       throw Exception('Failed to create comment');
     }
+  }
+
+  static Future<void> logout() async {
+    final prefs = EncryptedSharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('user_id');
+    await prefs.remove('name');
+    await prefs.remove('email');
+    await prefs.remove('phone_no');
+    await prefs.remove('address');
   }
 }
