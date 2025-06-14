@@ -525,6 +525,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
+  todo:
+    dependency: "direct dev"
+    description:
+      name: todo
+      sha256: "1c092daccc5e42568109716001f91e7cdfdb744aa2f3950ae67e64978ea4d3dd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:

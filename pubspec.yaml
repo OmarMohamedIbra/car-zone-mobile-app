@@ -21,7 +21,7 @@ dev_dependencies:
   provider: ^6.1.5
   dartz: ^0.10.1
   encrypt_shared_preferences: ^0.9.9
-  todo: ^1.0.0
+  todo: ^2.0.1
   
 
 flutter:
