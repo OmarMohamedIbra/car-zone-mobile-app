@@ -1,0 +1,191 @@
+import 'dart:convert';
+import 'dart:async';
+import 'package:carzone_demo/data/responses/get_car_response.dart';
+import 'package:encrypt_shared_preferences/provider.dart';
+import 'package:http/http.dart' as http;
+
+class Api {
+  static const String baseUrl = "http://191.96.53.235:8084";
+
+  static Future<bool> login(String email, String password) async {
+    try {
+      final url = Uri.parse('$baseUrl${'/api/login'}');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      if (response.statusCode == 200) {
+        // final data = jsonDecode(response.body);
+        // final prefs = EncryptedSharedPreferences.getInstance();
+        // await prefs.setString('token', data['token']);
+        return true;
+      } else if (response.statusCode == 400 || response.statusCode == 401) {
+        // Incorrect credentials
+        return false;
+      } else {
+        // Server error
+        throw Exception('Server error');
+      }
+    } on http.ClientException catch (_) {
+      throw Exception('Network error');
+    } catch (e) {
+      throw Exception('Network error');
+    }
+  }
+  static Future<GetCarResponse> getCars() async {
+  try {
+    final url = Uri.parse('$baseUrl/api/cars');
+    final response = await http.get(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    print('Status: ${response.statusCode}');
+    print('Content-Type: ${response.headers['content-type']}');
+    print('Body: ${response.body}');
+final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+    
+      return GetCarResponse.fromJson(data);
+    } else if (response.statusCode == 400 || response.statusCode == 401) {
+      final data = jsonDecode(response.body);
+      return GetCarResponse.fromJson(data);
+    } else {
+      throw Exception('Server error: ${response.statusCode}');
+    }
+  } on http.ClientException {
+    throw Exception('Network error');
+  } catch (e) {
+    throw Exception('Unexpected error: $e');
+  }
+}
+
+
+  static Timer? _refreshTimer;
+  static void _cancelRefreshTimer() {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
+  }
+
+  static Future<void> refreshToken({bool scheduleNext = true}) async {
+    final prefs = EncryptedSharedPreferences.getInstance();
+    final refreshToken = prefs.getString('refreshToken');
+    final isCompany = prefs.getBool('isCompany') ?? false;
+    final url = Uri.parse(
+      isCompany ? '$baseUrl/company/refresh' : '$baseUrl/refresh',
+    );
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'refreshToken': refreshToken}),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      await prefs.setString('accessToken', data['accessToken']);
+      await prefs.setString('refreshToken', data['refreshToken']);
+      // Schedule next refresh based on expiresIn, but avoid multiple timers
+      if (scheduleNext && data['expiresIn'] != null) {
+        final int expiresIn = data['expiresIn'];
+        final int refreshAfter =
+            (expiresIn > 35)
+                ? (expiresIn - 30)
+                : (expiresIn > 5 ? expiresIn - 5 : expiresIn);
+
+        _cancelRefreshTimer();
+        _refreshTimer = Timer(Duration(seconds: refreshAfter), () async {
+          await Api.refreshToken();
+        });
+      }
+    }
+  }
+
+  static Future<String?> getAccessToken() async {
+    final prefs = EncryptedSharedPreferences.getInstance();
+    return prefs.getString('accessToken');
+  }
+
+  // --- Register implementation ---
+  static Future<bool> register({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+    required String address,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/register');
+      final body = {
+        "email": email,
+        "password": password,
+        "fname": firstName,
+        "lname": lastName,
+        "phone_no": phoneNumber,
+        "address": address,
+      };
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        // Optionally, you can parse response.body for error details
+        return false;
+      }
+    } catch (e) {
+      // Handle network/server error
+      return false;
+    }
+  }
+
+  // --- Company Register implementation ---
+  static Future<bool> registerCompany({
+    required String id,
+    required String email,
+    required String password,
+    required String companyName,
+    required String phoneNumber,
+    String? about,
+    required String birthDate, // Format: yyyy-MM-dd
+    required String city,
+    required String industry,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/company/register');
+      final body = {
+        "id": id,
+        "email": email,
+        "password": password,
+        "companyName": companyName,
+        "phoneNumber": phoneNumber,
+        "about": about,
+        "birthDate": birthDate,
+        "city": city,
+        "industry": industry,
+      };
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        // Optionally, parse error message from backend and show to user
+        // Example:
+        // final error = jsonDecode(response.body)['error'] ?? 'Registration failed';
+        // throw Exception(error);
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+}
