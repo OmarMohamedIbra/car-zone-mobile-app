@@ -259,9 +259,14 @@ class _CarEventsScreenState extends State<CarEventsScreen>
             ),
           ),
           SizedBox(height: 10),
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 14,
+            runSpacing: 4,
             children: [
-              
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text('📅', style: TextStyle(fontSize: 16)),
                   SizedBox(width: 8),
                   Text(
@@ -271,16 +276,19 @@ class _CarEventsScreenState extends State<CarEventsScreen>
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                
-              SizedBox(width: 14),
-            
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text('🕐', style: TextStyle(fontSize: 16)),
                   SizedBox(width: 6),
                   Text(
                     event.time,
                     style: TextStyle(color: Colors.white.withOpacity(0.8)),
                   ),
-                
+                ],
+              ),
             ],
           ),
           SizedBox(height: 10),

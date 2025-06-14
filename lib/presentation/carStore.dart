@@ -105,6 +105,150 @@ class _CarStoreScreenState extends State<CarStoreScreen>
       features: ['Safety Sense', 'Wireless Charging', 'JBL Audio'],
       emoji: '🚘',
     ),
+    // New cars below
+    Car(
+      model: 'Lamborghini Urus Performante',
+      year: 2025,
+      price: "325000",
+      engine: '4.0L V8 Twin-Turbo',
+      transmission: '8-speed Auto',
+      mileage: '1,200 km',
+      fuelType: 'Petrol',
+      features: ['Carbon Package', 'Night Vision', 'B&O Sound System', 'Adaptive Air Suspension'],
+      emoji: '🏎️',
+    ),
+    Car(
+      model: 'Rolls-Royce Ghost Black Badge',
+      year: 2025,
+      price: "450000",
+      engine: '6.75L V12',
+      transmission: '8-speed Auto',
+      mileage: '500 km',
+      fuelType: 'Petrol',
+      features: ['Starlight Headliner', 'Bespoke Audio', 'Rear Theater', 'Champagne Cooler'],
+      emoji: '🚙',
+    ),
+    Car(
+      model: 'Tesla Model S Plaid',
+      year: 2025,
+      price: "135000",
+      engine: 'Tri-Motor Electric',
+      transmission: 'Single-Speed',
+      mileage: '2,000 km',
+      fuelType: 'Electric',
+      features: ['Full Self-Driving', 'Gaming Computer', 'Glass Roof', 'Yoke Steering'],
+      emoji: '🚗',
+    ),
+    Car(
+      model: 'Porsche Taycan Turbo S',
+      year: 2025,
+      price: "195000",
+      engine: 'Dual Electric Motors',
+      transmission: '2-Speed Auto',
+      mileage: '1,500 km',
+      fuelType: 'Electric',
+      features: ['Performance Battery Plus', 'Sport Chrono', 'Ceramic Brakes', 'Active Suspension'],
+      emoji: '🏎️',
+    ),
+    Car(
+      model: 'Range Rover SV Autobiography',
+      year: 2025,
+      price: "275000",
+      engine: '5.0L V8',
+      transmission: '8-speed Auto',
+      mileage: '3,000 km',
+      fuelType: 'Petrol',
+      features: ['Executive Seating', 'Event Seating', 'Hot Stone Massage', 'Meridian Signature Audio'],
+      emoji: '🚙',
+    ),
+    Car(
+      model: 'McLaren Artura',
+      year: 2025,
+      price: "237500",
+      engine: '3.0L V6 Hybrid',
+      transmission: '8-speed DCT',
+      mileage: '800 km',
+      fuelType: 'Hybrid',
+      features: ['Carbon Monocage', 'Electro Hydraulic Steering', 'Variable Drift Control', 'Track Telemetry'],
+      emoji: '🏎️',
+    ),
+    Car(
+      model: 'Bentley Flying Spur Mulliner',
+      year: 2025,
+      price: "285000",
+      engine: '6.0L W12',
+      transmission: '8-speed DCT',
+      mileage: '1,000 km',
+      fuelType: 'Petrol',
+      features: ['Diamond Quilting', 'Rotating Display', 'Naim Audio', 'City Specification'],
+      emoji: '🚗',
+    ),
+    Car(
+      model: 'Aston Martin DBX707',
+      year: 2025,
+      price: "245000",
+      engine: '4.0L V8 Twin-Turbo',
+      transmission: '9-speed Auto',
+      mileage: '1,800 km',
+      fuelType: 'Petrol',
+      features: ['22" Wheels', 'Sports Exhaust', 'Carbon Ceramic Brakes', 'Q Customization'],
+      emoji: '🚙',
+    ),
+    Car(
+      model: 'Ferrari SF90 Stradale',
+      year: 2025,
+      price: "507000",
+      engine: '4.0L V8 Hybrid',
+      transmission: '8-speed DCT',
+      mileage: '600 km',
+      fuelType: 'Hybrid',
+      features: ['eDrive Mode', 'Racing Seats', 'Carbon Fiber Wheels', 'Active Aero'],
+      emoji: '🏎️',
+    ),
+    Car(
+      model: 'Bugatti Chiron Super Sport',
+      year: 2025,
+      price: "3900000",
+      engine: '8.0L W16 Quad-Turbo',
+      transmission: '7-speed DCT',
+      mileage: '100 km',
+      fuelType: 'Petrol',
+      features: ['Top Speed Mode', 'Carbon Body', 'Luxury Interior', 'Advanced Cooling'],
+      emoji: '🚗',
+    ),
+    Car(
+      model: 'Lucid Air Dream Edition',
+      year: 2025,
+      price: "169000",
+      engine: 'Dual Electric Motors',
+      transmission: 'Single-Speed',
+      mileage: '1,100 km',
+      fuelType: 'Electric',
+      features: ['DreamDrive', 'Glass Canopy', '21" Wheels', 'Surreal Sound'],
+      emoji: '🚙',
+    ),
+    Car(
+      model: 'Chevrolet Corvette Z06',
+      year: 2025,
+      price: "106000",
+      engine: '5.5L V8',
+      transmission: '8-speed DCT',
+      mileage: '2,200 km',
+      fuelType: 'Petrol',
+      features: ['Performance Exhaust', 'Magnetic Ride', 'Carbon Aero', 'Bose Audio'],
+      emoji: '🏎️',
+    ),
+    Car(
+      model: 'Genesis G90',
+      year: 2025,
+      price: "89000",
+      engine: '3.5L V6 Twin-Turbo',
+      transmission: '8-speed Auto',
+      mileage: '3,500 km',
+      fuelType: 'Petrol',
+      features: ['Executive Package', 'Rear Seat Entertainment', 'Nappa Leather', 'Smart Parking'],
+      emoji: '🚗',
+    ),
   ];
 
   List<Car> sortedCars = [];
@@ -112,8 +256,9 @@ class _CarStoreScreenState extends State<CarStoreScreen>
   @override
   void initState(){
     super.initState();
-     _loadCars();
+    _loadCars();
     sortedCars = List.from(cars);
+    favorites = List.generate(cars.length, (index) => false);
     _animationController = AnimationController(
       duration: Duration(milliseconds: 600),
       vsync: this,
@@ -452,34 +597,41 @@ class _CarCardState extends State<CarCard> with SingleTickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.car.model,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.car.model,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                    softWrap: true,
                                   ),
-                                ),
-                                SizedBox(width: 5),
-                                Text(
-                                  widget.car.year.toString(),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFFDAA520),
-                                    fontWeight: FontWeight.w500,
+                                  SizedBox(width: 5),
+                                  Text(
+                                    widget.car.year.toString(),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFFDAA520),
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              '\$${widget.car.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFDAA520),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '\$${widget.car.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFFDAA520),
+                                    ),
+                                    softWrap: true,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.visible,
+                                  ),
+                                ],
                               ),
                             ),
                           ],

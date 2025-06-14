@@ -128,21 +128,21 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ),
       child: Row(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFFDAA520),
-                width: 3,
-              ),
-              image: const DecorationImage(
-                image: NetworkImage('https://randomuser.me/api/portraits/men/32.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          // Container(
+          //   width: 80,
+          //   height: 80,
+          //   decoration: BoxDecoration(
+          //     shape: BoxShape.circle,
+          //     border: Border.all(
+          //       color: const Color(0xFFDAA520),
+          //       width: 3,
+          //     ),
+          //     image: const DecorationImage(
+          //       image: NetworkImage('https://randomuser.me/api/portraits/men/32.jpg'),
+          //       fit: BoxFit.cover,
+          //     ),
+          //   ),
+          // ),
           const SizedBox(width: 20),
           Expanded(
             child: Column(
